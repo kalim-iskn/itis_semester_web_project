@@ -1,8 +1,10 @@
 package ru.kpfu.itis.iskander.repositories;
 
 import ru.kpfu.itis.iskander.classes.SaleAnnouncement;
+import ru.kpfu.itis.iskander.classes.Settings;
 import ru.kpfu.itis.iskander.database.DataBaseConnection;
 import ru.kpfu.itis.iskander.exceptions.NoSuchRecordIntoTableException;
+import ru.kpfu.itis.iskander.exceptions.ServerProblemException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -92,18 +94,25 @@ public class SaleAnnouncementRepository {
         return getCollection(resultSet);
     }
 
-    //TO DO offset
-    public ArrayList<SaleAnnouncement> getWithParameters(String name, String city, String category, int[] prices) throws SQLException {
+    public ArrayList<SaleAnnouncement> getWithParameters(String name, String city, String category, int[] prices, int offset) throws SQLException, ServerProblemException {
+        Settings settings = new Settings();
+        int searchOffset = Integer.parseInt(settings.get("search_offset"));
         String query = "SELECT * FROM announcements WHERE name LIKE ? AND city LIKE ? AND category LIKE ? AND price >= ?";
         if (prices[1] != -1)
             query += " AND price <= ?";
+        query += " ORDER BY id DESC LIMIT ?, ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, "%" + name + "%");
         statement.setString(2, city.equals("") ? "%" : city);
         statement.setString(3, category.equals("") ? "%" : category);
         statement.setInt(4, prices[0] == -1 ? 0 : prices[0]);
-        if (prices[1] != -1)
+        int nextStatement = 5;
+        if (prices[1] != -1) {
             statement.setInt(5, prices[1]);
+            nextStatement = 6;
+        }
+        statement.setInt(nextStatement, offset);
+        statement.setInt(nextStatement + 1, searchOffset);
         ResultSet resultSet = statement.executeQuery();
         return getCollection(resultSet);
     }

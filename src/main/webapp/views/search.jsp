@@ -9,23 +9,21 @@
             К сожалению, ничего не найдено
         </div>
     </c:if>
-    <div class="row">
-        <c:forEach items="${announcements}" var="announcement">
-            <a class="col-md-4 announcement-block" href="announcement?id=${announcement.getId()}">
-                <div class="img" style="background-image: url(${pageContext.request.contextPath}/pictures/${announcement.getMainPicture()})">
-                    <div class="category-name">
-                            ${announcement.getCategory()}
-                    </div>
-                </div>
-                <div class="content">
-                    <h5>${announcement.getName()}</h5>
-                    <div class="text">
-                            ${announcement.getDescription()}
-                    </div>
-                </div>
-            </a>
-        </c:forEach>
+    <div class="row" id="search">
+        <%@include file="announcements.jsp"%>
     </div>
+    <br>
+    <c:if test="${!isNotFound}">
+        <div class="text-center">
+            <button type="button" onclick="showMore()" class="btn main-btn load_more">Показать еще</button>
+        </div>
+    </c:if>
 </main>
+
+<script>
+    let offset = ${searchOffset};
+    let link = "get_announcements?q=${q}&searchCity=${searchCity}&searchCategory=${searchCategory}&price_from=${price_from}&price_to=${price_to}";
+</script>
+<script src="${pageContext.request.contextPath}/assets/js/show-more-announcements.js"></script>
 
 <%@include file="templates/footer.jsp"%>
